@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Registrar el servicio de productos (simula la base de datos)
+builder.Services.AddSingleton<IClienteService, ClienteService>();
 builder.Services.AddSingleton<IProductoService, ProductoService>();
 
 var app = builder.Build();
