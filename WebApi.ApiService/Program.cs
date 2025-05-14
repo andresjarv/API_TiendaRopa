@@ -5,18 +5,19 @@ using WebApi.ApiService.Negocio;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registrar servicios
+// Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Registrar el servicio de productos (simula la base de datos)
+var connectionString = builder.Configuration.GetConnectionString("SqlServer");
+
+builder.Services.AddSingleton(connectionString);
 builder.Services.AddSingleton<IClienteService, ClienteService>();
 builder.Services.AddSingleton<IProductoService, ProductoService>();
 
 var app = builder.Build();
 
-// Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -24,9 +25,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
+

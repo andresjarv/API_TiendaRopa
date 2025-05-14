@@ -1,39 +1,50 @@
 using Microsoft.AspNetCore.Mvc;
+using WebApi.ApiService.Entidades;
+using WebApi.ApiService.Negocio;
 
-[ApiController]
-[Route("api/[controller]")]
-public class ClienteController : ControllerBase
+namespace WebApi.ApiService.Controllers
 {
-    private readonly IClienteService _clienteService;
-
-    public ClienteController(IClienteService clienteService)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ClienteController : ControllerBase
     {
-        _clienteService = clienteService;
-    }
+        private readonly IClienteService _clienteService;
 
-    [HttpGet]
-    public ActionResult<IEnumerable<Cliente>> Get() => Ok(_clienteService.ObtenerTodos());
+        public ClienteController(IClienteService clienteService)
+        {
+            _clienteService = clienteService;
+        }
 
-    [HttpGet("{id}")]
-    public ActionResult<Cliente> Get(int id)
-    {
-        var cliente = _clienteService.ObtenerPorId(id);
-        if (cliente == null) return NotFound();
-        return Ok(cliente);
-    }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Cliente>>> Get()
+        {
+            var clientes = await _clienteService.ObtenerTodos();
+            return Ok(clientes);
+        }
 
-    [HttpPost]
-    public ActionResult<Cliente> Post(Cliente cliente)
-    {
-        var nuevo = _clienteService.Crear(cliente);
-        return CreatedAtAction(nameof(Get), new { id = nuevo.Id }, nuevo);
-    }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Cliente>> Get(int id)
+        {
+            var cliente = await _clienteService.ObtenerPorId(id);
+            if (cliente == null) return NotFound();
+            return Ok(cliente);
+        }
 
-    [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
-    {
-        if (!_clienteService.Eliminar(id)) return NotFound();
-        return NoContent();
+        [HttpPost]
+        public async Task<ActionResult<Cliente>> Post(Cliente cliente)
+        {    
+            var nuevoCliente = await _clienteService.Crear(cliente);
+            return CreatedAtAction(nameof(Get), new { id = nuevoCliente.Id }, nuevoCliente);
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            bool eliminado = await _clienteService.Eliminar(id);
+            return eliminado ? NoContent() : NotFound();
+        }
     }
 }
+
 

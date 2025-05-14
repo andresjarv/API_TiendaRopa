@@ -1,7 +1,8 @@
 public interface IClienteService
 {
-    IEnumerable<Cliente> ObtenerTodos();
-    Cliente ObtenerPorId(int id);
-    Cliente Crear(Cliente cliente);
-    bool Eliminar(int id);
+    Task<IEnumerable<Cliente>> ObtenerTodos();
+    Task<Cliente> ObtenerPorId(int id);
+    Task<Cliente> Crear(Cliente cliente);
+    Task<bool> Eliminar(int id);
 }
+

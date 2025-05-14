@@ -1,29 +1,57 @@
-using System.Collections.Generic;
-using System.Linq;
+using Dapper;
+using Microsoft.Data.SqlClient;
 using WebApi.ApiService.Entidades;
 
-namespace WebApi.ApiService.Negocio
+public class ProductoService : IProductoService
 {
-    public class ProductoService : IProductoService
+    private readonly string _connectionString;
+
+    public ProductoService(string connectionString)
     {
-        private readonly List<Producto> _productos = new List<Producto>();
-        private int _nextId = 1;
+        _connectionString = connectionString;
+    }
 
-        public List<Producto> ObtenerTodos() => _productos;
+    private SqlConnection dbConnection()
+    {
+        return new SqlConnection(_connectionString);
+    }
 
-        public Producto ObtenerPorId(int id) => _productos.FirstOrDefault(p => p.Id == id);
+    public async Task<List<Producto>> ObtenerTodos()
+    {
+        string sql = "SELECT * FROM Productos";
+        using var db = dbConnection();
+        var productos = await db.QueryAsync<Producto>(sql);
+        return productos.ToList();
+    }
 
-        public void Agregar(Producto producto)
+    public async Task<Producto> ObtenerPorID(int id)
+    {
+        string sql = "SELECT * FROM Productos WHERE Id = @Id";
+        using var db = dbConnection();
+        return await db.QueryFirstOrDefaultAsync<Producto>(sql, new { Id = id });
+    }
+
+    public async Task Agregar(Producto producto)
+    {
+        string sql = @"
+            INSERT INTO Productos (Nombre, Precio, Stock)
+            VALUES (@Nombre, @Precio, @Stock);";
+
+        using var db = dbConnection();
+        await db.ExecuteAsync(sql, new
         {
-            producto.Id = _nextId++;
-            _productos.Add(producto);
-        }
+            producto.Nombre,
+            producto.Precio,
+            producto.Stock
+        });
+    }
 
-        public bool Eliminar(int id)
-        {
-            var producto = ObtenerPorId(id);
-            return producto != null && _productos.Remove(producto);
-        }
+    public async Task<bool> Eliminar(int id)
+    {
+        string sql = "DELETE FROM Productos WHERE Id = @Id";
+        using var db = dbConnection();
+        var filasAfectadas = await db.ExecuteAsync(sql, new { Id = id });
+        return filasAfectadas > 0;
     }
 }
 
