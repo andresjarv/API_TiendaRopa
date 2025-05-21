@@ -1,0 +1,51 @@
+﻿﻿@page "/clientes"
+@using BlazorTiendaRopa.Entidades
+@using BlazorTiendaRopa.Negocio
+@inject ClienteNegocio ClienteNegocio
+
+<h3>listar Clientes</h3>
+
+@if (clientes == null)
+{
+    <p><em>No se pudo acceder a la base de datos</em></p>
+}
+else if (clientes.Count == 0)
+{
+    <p><em>No hay materias disponibles.</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cliente in clientes)
+            {
+                <tr>
+                    <td>@cliente.Id </td>
+                    <td>@cliente.Nombre</td>
+                    <td>@cliente.Correo</td>
+                    <td>
+                        <button class="btn btn-primary">Editar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<NuevoCurso/>
+
+@code {
+    private List<Cliente> clientes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clientes = await ClienteNegocio.ListarClientes();
+    }
+}
